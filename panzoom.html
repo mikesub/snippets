@@ -38,8 +38,7 @@
   </style>
 </head>
 <body>
-  <button id="resetZoom">100%</button>
-  <button id="resetCoords">back to 0,0</button>
+  <button id="reset">reset</button>
   <div id="containerNode">
     <div id="movable">
       <div class="component">
@@ -63,11 +62,16 @@ const movableNode = document.getElementById('movable');
 
 let pointerX;
 let pointerY;
+let movableScale;
+let movableX;
+let movableY;
 
-// initial values for the movable node
-let movableScale = 1;
-let movableX = 0;
-let movableY = 0;
+function reset() {
+  movableX = 0;
+  movableY = 0;
+  movableScale = 1;
+}
+reset();
 
 function render() {
   window.requestAnimationFrame(() => {
@@ -76,18 +80,10 @@ function render() {
 }
 render();
 
-document.getElementById('resetCoords').addEventListener('click', function() {
-  movableX = 0;
-  movableY = 0;
+document.getElementById('reset').addEventListener('click', function() {
+  reset();
   render();
 });
-
-
-document.getElementById('resetZoom').addEventListener('click', function() {
-  movableScale = 1;
-  render();
-});
-
 
 containerNode.addEventListener('wheel', function(event) {
   event.preventDefault();
