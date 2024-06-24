@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>zoom pan</title>
+  <style>
+    body {
+      background-color: gray;
+    }
+    #containerNode {
+      background-color: white;
+      overflow: hidden;
+      position: fixed;
+      top: 50px;
+      left: 50px;
+      bottom: 50px;
+      right: 50px;
+      user-select: none;
+      touch-action: none;      
+    }
+
+    #movable {
+      background-color: red;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    .component {
+      background: gold;
+      width: 500px;
+      height: 500px;
+      border: 5px solid black;
+      padding: 5px;
+      border-radius: 14px;
+    }
+
+  </style>
+</head>
+<body>
+  <button id="resetZoom">100%</button>
+  <button id="resetCoords">back to 0,0</button>
+  <div id="containerNode">
+    <div id="movable">
+      <div class="component">
+          <h1>some text</h1>
+          <p>more text</p>
+          <input type="text"/>
+          <select>
+            <option>1</option>
+            <option>2</option>
+          </select>
+          <p>and then more text</p>
+      </div>
+    </div>
+</div>
+<script>
+
+const containerDefaultCursor = 'default';
+const containerNode = document.getElementById("containerNode");
+containerNode.style.cursor = containerDefaultCursor;
+const movableNode = document.getElementById('movable');
+
+let pointerX;
+let pointerY;
+
+// initial values for the movable node
+let movableScale = 1;
+let movableX = 0;
+let movableY = 0;
+
+function render() {
+  window.requestAnimationFrame(() => {
+    movableNode.style.transform = `translate3D(${movableX}px, ${movableY}px, 0px) scale(${movableScale})`
+  })
+}
+render();
+
+document.getElementById('resetCoords').addEventListener('click', function() {
+  movableX = 0;
+  movableY = 0;
+  render();
+});
+
+
+document.getElementById('resetZoom').addEventListener('click', function() {
+  movableScale = 1;
+  render();
+});
+
+
+containerNode.addEventListener('wheel', function(event) {
+  event.preventDefault();
+
+  if (event.metaKey || event.ctrlKey) {
+    let _movableScale = movableScale - event.deltaY * 0.01;
+    _movableScale = Math.max(_movableScale, 0.75);
+    _movableScale = Math.min(_movableScale, 1.25);
+    movableScale = _movableScale;
+  } else {
+    movableX -= event.deltaX * 2;
+    movableY -= event.deltaY * 2;
+  }
+  render();
+});
+
+containerNode.addEventListener("pointerdown", function (event) { 
+  event.preventDefault();
+
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+
+  containerNode.addEventListener("pointermove", zoomPan);
+});
+
+containerNode.addEventListener("pointerup", function(event) { 
+  event.preventDefault();
+  containerNode.removeEventListener("pointermove", zoomPan); 
+});
+
+function zoomPan(event) { 
+  event.preventDefault();
+
+  if (event.metaKey) {
+    
+    let _movableScale = movableScale - (event.clientY - pointerY) * 0.01;    
+    _movableScale = Math.max(_movableScale, 0.75);
+    _movableScale = Math.min(_movableScale, 1.25);
+    movableScale = _movableScale;
+
+  } else {
+
+    const deltaX = event.clientX - pointerX;
+    const deltaY = event.clientY - pointerY;
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+
+    movableX += deltaX;
+    movableY += deltaY;
+  }
+  render();
+}
+
+</script>
+</body>
+</html>
